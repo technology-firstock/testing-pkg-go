@@ -1,4 +1,4 @@
-package firstock
+package Firstock
 
 import (
 	"bytes"

@@ -1,4 +1,4 @@
-package firstock
+package Firstock
 
 import (
 	"crypto/sha256"

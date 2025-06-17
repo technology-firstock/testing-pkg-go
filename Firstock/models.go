@@ -1,6 +1,6 @@
-package firstock
+package Firstock
 
-//Models for Login
+// Models for Login
 type LoginRequest struct {
 	UserId     string `json:"userId"`
 	Password   string `json:"password"`
@@ -64,7 +64,7 @@ type PlaceOrderRequestBody struct {
 	Remarks         string `json:"remarks"`
 }
 
-//Models for OrderMargin
+// Models for OrderMargin
 type OrderMarginRequest struct {
 	UserId          string `json:"userId"`
 	Exchange        string `json:"exchange"`
@@ -122,7 +122,7 @@ type GetInfoRequestBody struct {
 	TradingSymbol string `json:"tradingSymbol"`
 }
 
-//Model for ModifyOrder
+// Model for ModifyOrder
 type ModifyOrderRequest struct {
 	UserId         string `json:"userId"`
 	OrderNumber    string `json:"orderNumber"`

@@ -1,4 +1,4 @@
-package firstock
+package Firstock
 
 const base_url = "https://connect-go.thefirstock.tech/V1"
 const config_file_path = "../firstock/config.json"
