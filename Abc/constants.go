@@ -1,4 +1,6 @@
-package Firstock
+// Copyright (c) [2025] [abc]
+// SPDX-License-Identifier: MIT
+package Abc
 
 const base_url = "https://connect-go.thefirstock.tech/V1"
 const config_file_path = "../firstock/config.json"
