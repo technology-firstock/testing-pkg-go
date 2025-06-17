@@ -1,3 +1,5 @@
+// Copyright (c) [2025] [abc]
+// SPDX-License-Identifier: MIT
 package Firstock
 
 import (
