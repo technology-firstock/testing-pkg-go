@@ -3,7 +3,7 @@
 package Abc
 
 const base_url = "https://connect-go.thefirstock.tech/V1"
-const config_file_path = "../firstock/config.json"
+const config_file_path = "../Abc/config.json"
 const j_key = "jkey"
 const status_val = "status"
 const success_status = "success"
