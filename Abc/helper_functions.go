@@ -8,6 +8,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
+	"runtime"
 )
 
 func EncodePassword(pwd string) string {
@@ -51,6 +53,7 @@ func ReadJKeyFromConfig(configPath string, userId string) (string, error) {
 }
 
 func RemoveJKeyFromConfig(userId string) error {
+	config_file_path := getPackageConfigPath()
 	file, err := os.Open(config_file_path)
 	if err != nil {
 		return nil
@@ -80,11 +83,20 @@ func RemoveJKeyFromConfig(userId string) error {
 
 	return nil
 }
+func getPackageConfigPath() string {
+	// Get the current file's directory (your package directory)
+	_, filename, _, _ := runtime.Caller(0)
+	packageDir := filepath.Dir(filename)
+
+	// Create config file in the package directory
+	return filepath.Join(packageDir, "config.json")
+}
 
 func SaveJKeyToConfig(data LogoutRequest) error {
 	// Extract userId and jkey from data
 	userId := data.UserId
 	jkey := data.JKey
+	config_file_path := getPackageConfigPath()
 	// Open or create file
 	configFile, err := os.OpenFile(config_file_path, os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
