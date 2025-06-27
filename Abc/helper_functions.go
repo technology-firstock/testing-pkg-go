@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"runtime"
+	"sync"
 )
 
 func EncodePassword(pwd string) string {
@@ -17,7 +17,12 @@ func EncodePassword(pwd string) string {
 	return hex.EncodeToString(hash[:])
 }
 
-func ReadJKeyFromConfig(configPath string, userId string) (string, error) {
+func ReadJKeyFromConfig(userId string) (string, error) {
+	configPath, err := getConfigPath()
+
+	if err != nil {
+		return "", fmt.Errorf("could not open config file: %w", err)
+	}
 	file, err := os.Open(configPath)
 	if err != nil {
 		return "", fmt.Errorf("could not open config file: %w", err)
@@ -52,82 +57,85 @@ func ReadJKeyFromConfig(configPath string, userId string) (string, error) {
 	return jkey, nil
 }
 
-func RemoveJKeyFromConfig(userId string) error {
-	config_file_path := getPackageConfigPath()
-	file, err := os.Open(config_file_path)
-	if err != nil {
-		return nil
-	}
-	defer file.Close()
+var configMu sync.Mutex
 
-	var config map[string]interface{}
-	if err := json.NewDecoder(file).Decode(&config); err != nil {
-		return fmt.Errorf("could not decode config JSON: %w", err)
+func SaveJKeyToConfig(data LogoutRequest) error {
+	userId := data.UserId
+	jkey := data.JKey
+
+	const configFile = "config.json"
+
+	configMu.Lock()
+	defer configMu.Unlock()
+
+	config := map[string]map[string]string{}
+
+	if _, err := os.Stat(configFile); err == nil {
+		bytes, err := os.ReadFile(configFile)
+		if err != nil {
+			return err
+		}
+		if err := json.Unmarshal(bytes, &config); err != nil {
+			return err
+		}
 	}
 
 	if _, ok := config[userId]; !ok {
-		return fmt.Errorf("userId %s not found in config", userId)
-	}
-
-	delete(config, userId)
-
-	file, err = os.Create(config_file_path)
-	if err != nil {
-		return fmt.Errorf("could not create config file: %w", err)
-	}
-	defer file.Close()
-
-	if err := json.NewEncoder(file).Encode(config); err != nil {
-		return fmt.Errorf("could not write updated config JSON: %w", err)
-	}
-
-	return nil
-}
-func getPackageConfigPath() string {
-	// Get the current file's directory (your package directory)
-	_, filename, _, _ := runtime.Caller(0)
-	packageDir := filepath.Dir(filename)
-
-	// Create config file in the package directory
-	return filepath.Join(packageDir, "config.json")
-}
-
-func SaveJKeyToConfig(data LogoutRequest) error {
-	// Extract userId and jkey from data
-	userId := data.UserId
-	jkey := data.JKey
-	config_file_path := getPackageConfigPath()
-	// Open or create file
-	configFile, err := os.OpenFile(config_file_path, os.O_RDWR|os.O_CREATE, 0644)
-	if err != nil {
-		return err
-	}
-	defer configFile.Close()
-
-	// Load existing config
-	config := map[string]map[string]string{}
-	decoder := json.NewDecoder(configFile)
-	_ = decoder.Decode(&config) // ignore error if file is empty
-
-	// Add or update jKey for this user
-	if config[userId] == nil {
 		config[userId] = map[string]string{}
 	}
-	config[userId][j_key] = jkey
+	config[userId]["jkey"] = jkey
 
-	// Truncate and seek to beginning before writing
-	if err := configFile.Truncate(0); err != nil {
+	jsonBytes, err := json.MarshalIndent(config, "", "  ")
+	if err != nil {
 		return err
 	}
-	if _, err := configFile.Seek(0, 0); err != nil {
+	return os.WriteFile(configFile, jsonBytes, 0644)
+}
+
+func RemoveJKeyFromConfig(userId string) error {
+	const configFile = "config.json"
+
+	configMu.Lock()
+	defer configMu.Unlock()
+
+	// Check if config file exists
+	if _, err := os.Stat(configFile); os.IsNotExist(err) {
+		return fmt.Errorf("config file does not exist")
+	}
+
+	// Read and unmarshal config
+	bytes, err := os.ReadFile(configFile)
+	if err != nil {
+		return err
+	}
+	config := map[string]map[string]string{}
+	if err := json.Unmarshal(bytes, &config); err != nil {
 		return err
 	}
 
-	// Write updated config
-	encoder := json.NewEncoder(configFile)
-	encoder.SetIndent("", "  ")
-	if err := encoder.Encode(config); err != nil {
+	// Remove jkey if present
+	if userConfig, ok := config[userId]; ok {
+		if _, exists := userConfig["jkey"]; exists {
+			delete(userConfig, "jkey")
+			// If userConfig is now empty, remove the userId entry
+			if len(userConfig) == 0 {
+				delete(config, userId)
+			}
+		}
+	}
+
+	// Write updated config back to file
+	jsonBytes, err := json.MarshalIndent(config, "", "  ")
+	if err != nil {
 		return err
 	}
-	return nil
+	return os.WriteFile(configFile, jsonBytes, 0644)
+}
+
+func getConfigPath() (string, error) {
+	cwd, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(cwd, "config.json"), nil
 }

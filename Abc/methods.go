@@ -56,7 +56,7 @@ func (fs *firstock) Login(reqBody LoginRequest) (jsonResponse string, err error)
 		}
 
 		// Write the following to a config.json file. Create the file if it does not exist.
-		SaveJKeyToConfig(LogoutRequest{
+		err = SaveJKeyToConfig(LogoutRequest{
 			UserId: reqBody.UserId,
 			JKey:   sUserToken,
 		})
@@ -79,9 +79,8 @@ func (fs *firstock) Logout(userId string) (jsonResponse string, err error) {
 	logout.UserId = userId
 	logout.JKey = ""
 
-	config_file_path := getPackageConfigPath()
 	// Read jKey for userId from config.json
-	jkey, errRead := ReadJKeyFromConfig(config_file_path, userId)
+	jkey, errRead := ReadJKeyFromConfig(userId)
 	if errRead != nil {
 		fmt.Println("Error reading jkey from config:", errRead)
 		err = errors.New(login_first_to_logout)
@@ -114,9 +113,8 @@ func (fs *firstock) Logout(userId string) (jsonResponse string, err error) {
 func (fs *firstock) UserDetails(userId string) (userDetailsResponse string, err error) {
 	var userDetailsRequest UserDetailsRequest
 
-	config_file_path := getPackageConfigPath()
 	// Read jKey for userId from config.json
-	jkey, errRead := ReadJKeyFromConfig(config_file_path, userId)
+	jkey, errRead := ReadJKeyFromConfig(userId)
 	if errRead != nil {
 		fmt.Println("Error reading jkey from config:", errRead)
 		err = errors.New(login_first_to_fetch_user_details)
@@ -144,8 +142,7 @@ func (fs *firstock) UserDetails(userId string) (userDetailsResponse string, err 
 }
 
 func (fs *firstock) PlaceOrder(req PlaceOrderRequest) (jsonResponse string, err error) {
-	config_file_path := getPackageConfigPath()
-	jkey, errRead := ReadJKeyFromConfig(config_file_path, req.UserId)
+	jkey, errRead := ReadJKeyFromConfig(req.UserId)
 	if errRead != nil {
 		fmt.Println("failed to read jkey from config: %w", errRead)
 		err = errors.New(login_first_to_place_order)
@@ -186,8 +183,7 @@ func (fs *firstock) PlaceOrder(req PlaceOrderRequest) (jsonResponse string, err 
 }
 
 func (fs *firstock) OrderMargin(req OrderMarginRequest) (jsonResponse string, err error) {
-	config_file_path := getPackageConfigPath()
-	jkey, errRead := ReadJKeyFromConfig(config_file_path, req.UserId)
+	jkey, errRead := ReadJKeyFromConfig(req.UserId)
 	if errRead != nil {
 		fmt.Println("failed to read jkey from config: %w", errRead)
 		err = errors.New(login_first_to_fetch_order_margin)
@@ -226,8 +222,7 @@ func (fs *firstock) OrderMargin(req OrderMarginRequest) (jsonResponse string, er
 }
 
 func (fs *firstock) SingleOrderHistory(req OrderRequest) (jsonResponse string, err error) {
-	config_file_path := getPackageConfigPath()
-	jkey, errRead := ReadJKeyFromConfig(config_file_path, req.UserId)
+	jkey, errRead := ReadJKeyFromConfig(req.UserId)
 	if errRead != nil {
 		fmt.Println("failed to read jkey from config: %w", errRead)
 		err = errors.New(login_first_to_fetch_single_order_history)
@@ -260,8 +255,7 @@ func (fs *firstock) SingleOrderHistory(req OrderRequest) (jsonResponse string, e
 }
 
 func (fs *firstock) CancelOrder(req OrderRequest) (jsonResponse string, err error) {
-	config_file_path := getPackageConfigPath()
-	jkey, errRead := ReadJKeyFromConfig(config_file_path, req.UserId)
+	jkey, errRead := ReadJKeyFromConfig(req.UserId)
 	if errRead != nil {
 		fmt.Println("failed to read jkey from config: %w", errRead)
 		err = errors.New(login_first_to_cancel_order)
@@ -294,8 +288,7 @@ func (fs *firstock) CancelOrder(req OrderRequest) (jsonResponse string, err erro
 }
 
 func (fs *firstock) ModifyOrder(req ModifyOrderRequest) (jsonResponse string, err error) {
-	config_file_path := getPackageConfigPath()
-	jkey, errRead := ReadJKeyFromConfig(config_file_path, req.UserId)
+	jkey, errRead := ReadJKeyFromConfig(req.UserId)
 	if errRead != nil {
 		fmt.Println("failed to read jkey from config: %w", errRead)
 		err = errors.New(login_first_to_modify_order)
@@ -336,8 +329,7 @@ func (fs *firstock) ModifyOrder(req ModifyOrderRequest) (jsonResponse string, er
 }
 
 func (fs *firstock) TradeBook(userId string) (jsonResponse string, err error) {
-	config_file_path := getPackageConfigPath()
-	jkey, errRead := ReadJKeyFromConfig(config_file_path, userId)
+	jkey, errRead := ReadJKeyFromConfig(userId)
 	if errRead != nil {
 		fmt.Println("failed to read jkey from config: %w", errRead)
 		err = errors.New(login_first_to_fetch_trade_book_details)
@@ -369,8 +361,7 @@ func (fs *firstock) TradeBook(userId string) (jsonResponse string, err error) {
 }
 
 func (fs *firstock) RMSLmit(userId string) (jsonResponse string, err error) {
-	config_file_path := getPackageConfigPath()
-	jkey, errRead := ReadJKeyFromConfig(config_file_path, userId)
+	jkey, errRead := ReadJKeyFromConfig(userId)
 	if errRead != nil {
 		fmt.Println("failed to read jkey from config: %w", errRead)
 		err = errors.New(login_first_to_fetch_rms_limit)
@@ -402,8 +393,7 @@ func (fs *firstock) RMSLmit(userId string) (jsonResponse string, err error) {
 }
 
 func (fs *firstock) PositionBook(userId string) (jsonResponse string, err error) {
-	config_file_path := getPackageConfigPath()
-	jkey, errRead := ReadJKeyFromConfig(config_file_path, userId)
+	jkey, errRead := ReadJKeyFromConfig(userId)
 	if errRead != nil {
 		fmt.Println("failed to read jkey from config: %w", errRead)
 		err = errors.New(login_first_to_fetch_position_book)
@@ -435,8 +425,7 @@ func (fs *firstock) PositionBook(userId string) (jsonResponse string, err error)
 }
 
 func (fs *firstock) Holdings(userId string) (jsonResponse string, err error) {
-	config_file_path := getPackageConfigPath()
-	jkey, errRead := ReadJKeyFromConfig(config_file_path, userId)
+	jkey, errRead := ReadJKeyFromConfig(userId)
 	if errRead != nil {
 		fmt.Println("failed to read jkey from config: %w", errRead)
 		err = errors.New(login_first_to_fetch_holdings)
@@ -468,8 +457,7 @@ func (fs *firstock) Holdings(userId string) (jsonResponse string, err error) {
 }
 
 func (fs *firstock) OrderBook(userId string) (jsonResponse string, err error) {
-	config_file_path := getPackageConfigPath()
-	jkey, errRead := ReadJKeyFromConfig(config_file_path, userId)
+	jkey, errRead := ReadJKeyFromConfig(userId)
 	if errRead != nil {
 		fmt.Println("failed to read jkey from config: %w", errRead)
 		err = errors.New(login_first_to_fetch_order_book)
@@ -501,8 +489,7 @@ func (fs *firstock) OrderBook(userId string) (jsonResponse string, err error) {
 }
 
 func (fs *firstock) GetExpiry(getExpiryRequest GetInfoRequest) (jsonResponse string, err error) {
-	config_file_path := getPackageConfigPath()
-	jkey, errRead := ReadJKeyFromConfig(config_file_path, getExpiryRequest.UserId)
+	jkey, errRead := ReadJKeyFromConfig(getExpiryRequest.UserId)
 	if errRead != nil {
 		fmt.Println("failed to read jkey from config: %w", errRead)
 		err = errors.New(login_first_to_fetch_expiry_details)
@@ -536,8 +523,7 @@ func (fs *firstock) GetExpiry(getExpiryRequest GetInfoRequest) (jsonResponse str
 }
 
 func (fs *firstock) BrokerageCalculator(brokerageCalculatorRequest BrokerageCalculatorRequest) (jsonResponse string, err error) {
-	config_file_path := getPackageConfigPath()
-	jkey, errRead := ReadJKeyFromConfig(config_file_path, brokerageCalculatorRequest.UserId)
+	jkey, errRead := ReadJKeyFromConfig(brokerageCalculatorRequest.UserId)
 	if errRead != nil {
 		fmt.Println("failed to read jkey from config: %w", errRead)
 		err = errors.New(login_first_to_fetch_brokerage_calculator_details)
@@ -578,8 +564,7 @@ func (fs *firstock) BrokerageCalculator(brokerageCalculatorRequest BrokerageCalc
 }
 
 func (fs *firstock) BasketMargin(basketMarginRequest BasketMarginRequest) (jsonResponse string, err error) {
-	config_file_path := getPackageConfigPath()
-	jkey, errRead := ReadJKeyFromConfig(config_file_path, basketMarginRequest.UserId)
+	jkey, errRead := ReadJKeyFromConfig(basketMarginRequest.UserId)
 	if errRead != nil {
 		fmt.Println("failed to read jkey from config: %w", errRead)
 		err = errors.New(login_first_to_fetch_basket_margin_details)
@@ -619,8 +604,7 @@ func (fs *firstock) BasketMargin(basketMarginRequest BasketMarginRequest) (jsonR
 }
 
 func (fs *firstock) GetSecurityInfo(getSecurityInfoRequest GetInfoRequest) (jsonResponse string, err error) {
-	config_file_path := getPackageConfigPath()
-	jkey, errRead := ReadJKeyFromConfig(config_file_path, getSecurityInfoRequest.UserId)
+	jkey, errRead := ReadJKeyFromConfig(getSecurityInfoRequest.UserId)
 	if errRead != nil {
 		fmt.Println("failed to read jkey from config: %w", errRead)
 		err = errors.New(login_first_to_get_security_info)
@@ -654,8 +638,7 @@ func (fs *firstock) GetSecurityInfo(getSecurityInfoRequest GetInfoRequest) (json
 }
 
 func (fs *firstock) ProductConversion(productConversionRequest ProductConversionRequest) (jsonResponse string, err error) {
-	config_file_path := getPackageConfigPath()
-	jkey, errRead := ReadJKeyFromConfig(config_file_path, productConversionRequest.UserId)
+	jkey, errRead := ReadJKeyFromConfig(productConversionRequest.UserId)
 	if errRead != nil {
 		fmt.Println("failed to read jkey from config: %w", errRead)
 		err = errors.New(login_first_to_fetch_product_conversion_details)
@@ -693,8 +676,7 @@ func (fs *firstock) ProductConversion(productConversionRequest ProductConversion
 
 // Market Connect
 func (fs *firstock) GetQuote(getQuoteRequest GetInfoRequest) (jsonResponse string, err error) {
-	config_file_path := getPackageConfigPath()
-	jkey, errRead := ReadJKeyFromConfig(config_file_path, getQuoteRequest.UserId)
+	jkey, errRead := ReadJKeyFromConfig(getQuoteRequest.UserId)
 	if errRead != nil {
 		fmt.Println("failed to read jkey from config: %w", errRead)
 		err = errors.New(login_first_to_get_quote)
@@ -728,8 +710,7 @@ func (fs *firstock) GetQuote(getQuoteRequest GetInfoRequest) (jsonResponse strin
 }
 
 func (fs *firstock) GetQuoteLtp(getQuoteLtpRequest GetInfoRequest) (jsonResponse string, err error) {
-	config_file_path := getPackageConfigPath()
-	jkey, errRead := ReadJKeyFromConfig(config_file_path, getQuoteLtpRequest.UserId)
+	jkey, errRead := ReadJKeyFromConfig(getQuoteLtpRequest.UserId)
 	if errRead != nil {
 		fmt.Println("failed to read jkey from config: %w", errRead)
 		err = errors.New(login_first_to_get_quote_ltp)
@@ -763,8 +744,7 @@ func (fs *firstock) GetQuoteLtp(getQuoteLtpRequest GetInfoRequest) (jsonResponse
 }
 
 func (fs *firstock) GetMultiQuotes(getMultiQuotesRequest GetMultiQuotesRequest) (jsonResponse string, err error) {
-	config_file_path := getPackageConfigPath()
-	jkey, errRead := ReadJKeyFromConfig(config_file_path, getMultiQuotesRequest.UserId)
+	jkey, errRead := ReadJKeyFromConfig(getMultiQuotesRequest.UserId)
 	if errRead != nil {
 		fmt.Println("failed to read jkey from config: %w", errRead)
 		err = errors.New(login_first_to_get_multi_quotes)
@@ -797,8 +777,7 @@ func (fs *firstock) GetMultiQuotes(getMultiQuotesRequest GetMultiQuotesRequest) 
 }
 
 func (fs *firstock) GetMultiQuotesLtp(getMultiQuotesRequest GetMultiQuotesRequest) (jsonResponse string, err error) {
-	config_file_path := getPackageConfigPath()
-	jkey, errRead := ReadJKeyFromConfig(config_file_path, getMultiQuotesRequest.UserId)
+	jkey, errRead := ReadJKeyFromConfig(getMultiQuotesRequest.UserId)
 	if errRead != nil {
 		fmt.Println("failed to read jkey from config: %w", errRead)
 		err = errors.New(login_first_to_get_multi_quotes_ltp)
@@ -831,8 +810,7 @@ func (fs *firstock) GetMultiQuotesLtp(getMultiQuotesRequest GetMultiQuotesReques
 }
 
 func (fs *firstock) IndexList(userId string) (jsonResponse string, err error) {
-	config_file_path := getPackageConfigPath()
-	jkey, errRead := ReadJKeyFromConfig(config_file_path, userId)
+	jkey, errRead := ReadJKeyFromConfig(userId)
 	if errRead != nil {
 		fmt.Println("failed to read jkey from config: %w", errRead)
 		err = errors.New(login_first_to_fetch_index_list)
@@ -864,8 +842,7 @@ func (fs *firstock) IndexList(userId string) (jsonResponse string, err error) {
 }
 
 func (fs *firstock) SearchScrips(searchScripsRequest SearchScripsRequest) (jsonResponse string, err error) {
-	config_file_path := getPackageConfigPath()
-	jkey, errRead := ReadJKeyFromConfig(config_file_path, searchScripsRequest.UserId)
+	jkey, errRead := ReadJKeyFromConfig(searchScripsRequest.UserId)
 	if errRead != nil {
 		fmt.Println("failed to read jkey from config: %w", errRead)
 		err = errors.New(login_first_to_fetch_search_scrips)
@@ -898,8 +875,7 @@ func (fs *firstock) SearchScrips(searchScripsRequest SearchScripsRequest) (jsonR
 }
 
 func (fs *firstock) OptionChain(optionChainRequest OptionChainRequest) (jsonResponse string, err error) {
-	config_file_path := getPackageConfigPath()
-	jkey, errRead := ReadJKeyFromConfig(config_file_path, optionChainRequest.UserId)
+	jkey, errRead := ReadJKeyFromConfig(optionChainRequest.UserId)
 	if errRead != nil {
 		fmt.Println("failed to read jkey from config: %w", errRead)
 		err = errors.New(login_first_to_fetch_option_chain)
@@ -936,8 +912,7 @@ func (fs *firstock) OptionChain(optionChainRequest OptionChainRequest) (jsonResp
 }
 
 func (fs *firstock) TimePriceSeriesRegularInterval(req TimePriceSeriesIntervalRequest) (jsonResponse string, err error) {
-	config_file_path := getPackageConfigPath()
-	jkey, errRead := ReadJKeyFromConfig(config_file_path, req.UserId)
+	jkey, errRead := ReadJKeyFromConfig(req.UserId)
 	if errRead != nil {
 		fmt.Println("failed to read jkey from config: %w", errRead)
 		err = errors.New(login_first_to_fetch_time_price_series_regular_interval)
@@ -974,8 +949,7 @@ func (fs *firstock) TimePriceSeriesRegularInterval(req TimePriceSeriesIntervalRe
 }
 
 func (fs *firstock) TimePriceSeriesDayInterval(req TimePriceSeriesIntervalRequest) (jsonResponse string, err error) {
-	config_file_path := getPackageConfigPath()
-	jkey, errRead := ReadJKeyFromConfig(config_file_path, req.UserId)
+	jkey, errRead := ReadJKeyFromConfig(req.UserId)
 	if errRead != nil {
 		fmt.Println("failed to read jkey from config: %w", errRead)
 		err = errors.New(login_first_to_fetch_time_price_series_day_interval)
