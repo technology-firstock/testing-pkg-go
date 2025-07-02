@@ -12,12 +12,12 @@ import (
 	"sync"
 )
 
-func EncodePassword(pwd string) string {
+func encodePassword(pwd string) string {
 	hash := sha256.Sum256([]byte(pwd))
 	return hex.EncodeToString(hash[:])
 }
 
-func ReadJKeyFromConfig(userId string) (string, error) {
+func readJKeyFromConfig(userId string) (string, error) {
 	configPath, err := getConfigPath()
 
 	if err != nil {
@@ -59,7 +59,7 @@ func ReadJKeyFromConfig(userId string) (string, error) {
 
 var configMu sync.Mutex
 
-func SaveJKeyToConfig(data LogoutRequest) error {
+func saveJKeyToConfig(data LogoutRequest) error {
 	userId := data.UserId
 	jkey := data.JKey
 
@@ -70,13 +70,14 @@ func SaveJKeyToConfig(data LogoutRequest) error {
 
 	config := map[string]map[string]string{}
 
-	if _, err := os.Stat(configFile); err == nil {
-		bytes, err := os.ReadFile(configFile)
-		if err != nil {
-			return err
-		}
+	bytes, err := os.ReadFile(configFile)
+	if err == nil && len(bytes) > 0 {
 		if err := json.Unmarshal(bytes, &config); err != nil {
-			return err
+			// If error, clear the config and write empty JSON object
+			emptyConfig := map[string]map[string]string{}
+			jsonBytes, _ := json.MarshalIndent(emptyConfig, "", "  ")
+			_ = os.WriteFile(configFile, jsonBytes, 0644)
+			config = emptyConfig
 		}
 	}
 
@@ -89,10 +90,11 @@ func SaveJKeyToConfig(data LogoutRequest) error {
 	if err != nil {
 		return err
 	}
+	// Overwrite the file even if it did not exist or had read error
 	return os.WriteFile(configFile, jsonBytes, 0644)
 }
 
-func RemoveJKeyFromConfig(userId string) error {
+func removeJKeyFromConfig(userId string) error {
 	const configFile = "config.json"
 
 	configMu.Lock()
@@ -138,4 +140,20 @@ func getConfigPath() (string, error) {
 		return "", err
 	}
 	return filepath.Join(cwd, "config.json"), nil
+}
+
+func internalServerErrorResponse() string {
+	return responseStructure(false, internal_server_error)
+}
+
+func pleaseLoginToFirstock() string {
+	return responseStructure(false, please_login_to_firstock)
+}
+
+func failureResponseStructure(data string) string {
+	return responseStructure(false, data)
+}
+
+func successResponseStructure(data string) string {
+	return responseStructure(true, data)
 }
